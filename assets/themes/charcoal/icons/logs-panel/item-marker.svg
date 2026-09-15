@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!-- diamond marker / breakpoint indicator -->
+  <path d="M12 3.5L19 12L12 20.5L5 12Z" fill="#e2645e"/>
+  <path d="M12 6.5L16.5 12L12 17.5L7.5 12Z" fill="#e2645e" opacity="0.5"/>
+</svg>

@@ -1,0 +1,46 @@
+{
+    "editor-background": "#FAFAFA",
+    "editor-foreground": "#212529",
+    "editor-font": "Fira Code",
+    "editor-font-size": 11,
+
+    "margin-background": "#F0F4EE",
+    "margin-foreground": "#7A8877",
+
+    "caret-foreground": "#1E241D",
+    "caret-line-background": "#F4F7F2",
+
+    "selection-background": "#FFEFA6",
+
+    "marker-pc-foreground": "#4CAF50",
+    "marker-pc-background": "#4CAF50",
+
+    "marker-breakpoint-foreground": "#E53935",
+    "marker-breakpoint-background": "#E53935",
+
+    "marker-error-background": "#E53935",
+
+    "indicator-search-foreground": "#F4C430",
+    "indicator-pc-foreground": "#D5E7D0",
+
+    "syntax-default-foreground": "#212529",
+
+    "syntax-comment-foreground": "#5B8053",
+    "syntax-comment-italic": true,
+
+    "syntax-mnemonic-foreground": "#1976D2",
+    "syntax-mnemonic-bold": true,
+
+    "syntax-directive-foreground": "#8E24AA",
+
+    "syntax-register-foreground": "#00897B",
+
+    "syntax-label-foreground": "#B38200",
+
+    "syntax-number-foreground": "#388E3C",
+
+    "syntax-string-foreground": "#D81B60",
+
+    "syntax-trap-foreground": "#D32F2F",
+    "syntax-trap-bold": true
+}

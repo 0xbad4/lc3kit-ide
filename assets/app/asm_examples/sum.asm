@@ -1,0 +1,12 @@
+.ORIG x3000
+
+	LD  R1, NUM1
+	LD  R2, NUM2
+	ADD R3, R1, R2
+
+	HALT
+
+NUM1    .FILL #10
+NUM2    .FILL #20
+
+.END

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <!-- circle info badge -->
+  <circle cx="12" cy="12" r="9" fill="#F4C430"/>
+  <!-- i letter -->
+  <rect x="11.2" y="10.5" width="1.6" height="6" rx="0.6" fill="#1E241D"/>
+  <rect x="11.2" y="7.5" width="1.6" height="1.8" rx="0.6" fill="#1E241D"/>
+</svg>

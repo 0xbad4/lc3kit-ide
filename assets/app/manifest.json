@@ -1,0 +1,29 @@
+{
+    "name":          "lc3kit-ide",
+    "pretty-name":   "LC3 IDE",
+    "version":       "1.0",
+    "domain":        "dev.lc3kit",
+    "organization":  "lc3kit",
+    "source":        "https://github.com/0xbad4/lc3kit-ide",
+    "documentation": "https://0xbad4.github.io/lc3kit-ide",
+    "developer":     "https://github.com/0xbad4",
+    
+    "themes": [ "charcoal", "daisy" ],
+    "asm-examples": [
+        ":/app/asm_examples/bit_manipulation.asm",
+        ":/app/asm_examples/debug.asm",
+        ":/app/asm_examples/input.asm",
+        ":/app/asm_examples/lc3ext.asm",
+        ":/app/asm_examples/linear_search.asm",
+        ":/app/asm_examples/login.asm",
+        ":/app/asm_examples/loop.asm",
+        ":/app/asm_examples/max.asm",
+        ":/app/asm_examples/multiply_by_addition.asm",
+        ":/app/asm_examples/output.asm",
+        ":/app/asm_examples/palindrome.asm",
+        ":/app/asm_examples/reverse_array.asm",
+        ":/app/asm_examples/stack.asm",
+        ":/app/asm_examples/str_len.asm",
+        ":/app/asm_examples/sum.asm"
+    ]
+}

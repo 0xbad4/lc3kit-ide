@@ -1,0 +1,20 @@
+{
+  "bg-0":        "#1b1b1b",
+  "bg-1":        "#212121",
+  "bg-2":        "#262626",
+  "bg-3":        "#2f2f2f",
+  "bg-inset":    "#161616",
+  "border":      "#343434",
+  "soft-border": "#2a2a2a",
+  "text-0":      "#e8e8e8",
+  "text-1":      "#a3a3a3",
+  "text-2":      "#6d6d6d",
+  "accent":      "#4fb4e8",
+  "soft-accent": "#4fb4c7",
+  "hi-accent":   "#7fd0f7",
+  "text-accent": "#4fb4e8",
+  "ok":          "#8bc34a",
+  "warn":        "#e0a848",
+  "danger":      "#e2645e",
+  "violet":      "#b18cf0"
+}

@@ -1,0 +1,297 @@
+# Builds lc3kit-ide for Linux, Windows, and macOS as dynamically linked
+# binaries with every needed shared library (.so / .dll / .dylib) bundled
+# alongside the executable, then publishes everything to a single GitHub
+# Release.
+#
+# Two ways to run this:
+#   - Manually, via the Actions tab ("Run workflow"). Builds all three
+#     platforms, uploads them as inspectable artifacts, does NOT publish a
+#     release (there's no tag to attach one to). Use this while iterating.
+#   - By pushing a tag matching v*.*.* (e.g. v1.0.0). Same builds, plus a
+#     final job that publishes everything to a real GitHub Release.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+
+  # ------------------------------------------------------------------
+  # Linux: AppImage + .deb + .rpm
+  # ------------------------------------------------------------------
+  linux:
+    name: Linux
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential cmake ninja-build \
+            qt6-base-dev qt6-base-dev-tools libqt6opengl6-dev \
+            libqt6svg6-dev \
+            libqscintilla2-qt6-dev \
+            libgl1-mesa-dev libxkbcommon-dev \
+            fuse libfuse2 \
+            rpm dpkg-dev
+
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      # CPack reads the install() rules + CPACK_* variables already set in
+      # CMakeLists.txt and writes the .deb/.rpm straight into build/.
+      - name: Package deb / rpm
+        working-directory: build
+        run: |
+          cpack -G DEB
+          cpack -G RPM
+          # Sanity check: confirms the real filenames CPack produced, so if
+          # the upload step below ever comes up empty, this line in the log
+          # tells you immediately whether CPack is the problem or not.
+          ls -la *.deb *.rpm
+
+      - name: Build AppImage
+        run: |
+          mkdir -p AppDir packaging
+
+          # linuxdeploy needs an install tree laid out like a real Linux
+          # filesystem (AppDir/usr/bin, AppDir/usr/sh.pngare/...), which is
+          # exactly what a normal `cmake --install` with DESTDIR gives us.
+          DESTDIR="$PWD/AppDir" cmake --install build --prefix /usr
+
+          mkdir -p packaging
+          cat > packaging/lc3kit-ide.desktop <<'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=lc3kit-ide
+          Exec=lc3kit-ide
+          Icon=lc3kit-ide
+          Categories=Development;
+          EOF
+          # Real app icon from the repo, not a generated placeholder.
+          cp assets/img/lc3kit-ide.png packaging/lc3kit-ide.png
+
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy-x86_64.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
+
+          # The Qt plugin walks the binary's linked Qt modules and bundles
+          # the matching Qt plugins (icon engines, image formats, platform
+          # plugin, etc.) automatically - it needs qmake6 to find Qt itself.
+          export QMAKE=$(command -v qmake6)
+          ./linuxdeploy-x86_64.AppImage \
+            --appdir AppDir \
+            --plugin qt \
+            --desktop-file packaging/lc3kit-ide.desktop \
+            --icon-file packaging/lc3kit-ide.png \
+            --output appimage
+
+          # linuxdeploy already names the output lc3kit-ide-x86_64.AppImage
+          # (derived from the desktop file), so nothing to rename here.
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          # error instead of the default "warn": if these globs ever stop
+          # matching anything, this job fails loudly instead of silently
+          # shipping a release missing the deb/rpm.
+          if-no-files-found: error
+          path: |
+            lc3kit-ide-x86_64.AppImage
+            build/*.deb
+            build/*.rpm
+
+  # ------------------------------------------------------------------
+  # Windows: exe (MinGW build, Qt + QScintilla + every transitive DLL
+  # bundled into a folder/zip)
+  # ------------------------------------------------------------------
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      # MSYS2 ships a prebuilt qscintilla-qt6 package, which avoids
+      # compiling QScintilla from source on this runner.
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-qt6-base
+            mingw-w64-x86_64-qt6-svg
+            mingw-w64-x86_64-qt6-tools
+            mingw-w64-x86_64-qscintilla-qt6
+            zip
+
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Bundle
+        run: |
+          mkdir -p dist
+          cp build/lc3kit-ide.exe dist/
+
+          # windeployqt only looks at what lc3kit-ide.exe itself imports
+          # directly, so it correctly bundles Qt6Core/Gui/Widgets/Svg and
+          # their plugins.
+          windeployqt --release --no-translations dist/lc3kit-ide.exe
+
+          # windeployqt does NOT walk into third-party DLLs sitting next to
+          # the exe (like qscintilla2_qt6.dll) to find their own
+          # dependencies, and it never rescans DLLs it already placed
+          # itself - QScintilla links Qt6PrintSupport, which pulls in
+          # harfbuzz/freetype/icu/double-conversion/md4c/libb2/libpng16 as
+          # separate MSYS2 packages, and some of those are dependencies of
+          # Qt6Core.dll/Qt6Gui.dll themselves (already sitting in dist/
+          # from windeployqt, never walked). objdump statically reads the
+          # PE import table (no execution, unlike ldd, which is unreliable
+          # for GUI-subsystem binaries here) - "seen" tracks what's already
+          # been scanned (not just copied) so recursion doesn't stop early,
+          # and the final sweep re-scans everything windeployqt placed.
+          declare -A seen
+          copy_deps() {
+            local bin="$1"
+            local name
+            name=$(basename "$bin")
+            [ -n "${seen[$name]:-}" ] && return
+            seen[$name]=1
+            local dep
+            while read -r dep; do
+              if [ -f "/mingw64/bin/$dep" ]; then
+                [ -f "dist/$dep" ] || cp "/mingw64/bin/$dep" dist/
+                copy_deps "/mingw64/bin/$dep"
+              fi
+            done < <(objdump -p "$bin" | grep -i "DLL Name" | awk '{print $3}')
+          }
+
+          copy_deps dist/lc3kit-ide.exe
+          cp /mingw64/bin/qscintilla2_qt6.dll dist/
+          copy_deps /mingw64/bin/qscintilla2_qt6.dll
+
+          find dist -name '*.dll' -print0 | while IFS= read -r -d '' f; do
+            copy_deps "$f"
+          done
+
+          cd dist && zip -r ../lc3kit-ide-windows-x64.zip .
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          if-no-files-found: error
+          path: lc3kit-ide-windows-x64.zip
+
+  # ------------------------------------------------------------------
+  # macOS: dmg (Mach-O .app bundle, Qt via macdeployqt, QScintilla built
+  # from source and embedded)
+  # ------------------------------------------------------------------
+  macos:
+    name: macOS
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      # qtbase/qtsvg/qttools are separate Homebrew formulae (not the
+      # umbrella "qt" package, which pulls in qtpdf/qtvirtualkeyboard/
+      # qtwebengine and confuses macdeployqt's rpath resolution for
+      # modules we don't use at all).
+      - name: Install dependencies
+        run: brew install qtbase qtsvg qttools cmake ninja
+
+      # No reliably up-to-date prebuilt QScintilla-for-Qt6 package on
+      # Homebrew, so build it from its own qmake project against
+      # Homebrew's Qt6.
+      - name: Build QScintilla from source
+        run: |
+          curl -LO https://www.riverbankcomputing.com/static/Downloads/QScintilla/2.14.1/QScintilla_src-2.14.1.tar.gz
+          tar xf QScintilla_src-2.14.1.tar.gz
+          cd QScintilla_src-2.14.1/src
+          "$(brew --prefix qtbase)/bin/qmake" qscintilla.pro
+          make -j"$(sysctl -n hw.ncpu)"
+
+      - name: Configure
+        run: |
+          QSCI_DIR="$PWD/QScintilla_src-2.14.1/src"
+          QSCI_LIB=$(find "$QSCI_DIR" -name "libqscintilla2_qt6*.dylib" | head -n1)
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qtbase);$(brew --prefix qtsvg);$(brew --prefix qttools)" \
+            -DQt6Svg_DIR="$(brew --prefix qtsvg)/lib/cmake/Qt6Svg" \
+            -DQSCINTILLA_INCLUDE_DIR="$QSCI_DIR" \
+            -DQSCINTILLA_LIBRARY="$QSCI_LIB"
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Bundle Qt, embed QScintilla, make dmg
+        run: |
+          APP="build/lc3kit-ide.app"
+          BIN="$APP/Contents/MacOS/lc3kit-ide"
+          QSCI_LIB=$(find "$PWD/QScintilla_src-2.14.1/src" -name "libqscintilla2_qt6*.dylib" | head -n1)
+
+          mkdir -p "$APP/Contents/Frameworks"
+          cp "$QSCI_LIB" "$APP/Contents/Frameworks/"
+
+          # Repoint whatever path got baked into the binary at link time to
+          # the copy we just placed in Frameworks. Read it back with
+          # otool instead of assuming the exact string, since it depends on
+          # how QScintilla's own build set its install name.
+          OLD_ID=$(otool -L "$BIN" | grep -i qscintilla | awk '{print $1}')
+          install_name_tool -change "$OLD_ID" "@rpath/$(basename "$QSCI_LIB")" "$BIN"
+
+          # macdeployqt bundles Qt itself (frameworks + plugins) based on
+          # what the binary links. dmg creation is a separate step below,
+          # so a transient hdiutil lock doesn't take the whole deploy down.
+          "$(brew --prefix qtbase)/bin/macdeployqt" "$APP"
+          hdiutil create -volname lc3kit-ide -srcfolder "$APP" -ov -format UDZO lc3kit-ide-macos.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-package
+          if-no-files-found: error
+          path: lc3kit-ide-macos.dmg
+
+  # ------------------------------------------------------------------
+  # Collect everything and publish a single GitHub Release.
+  # Only runs on an actual tag push - workflow_dispatch runs build/upload
+  # only, so this job is skipped entirely for test runs.
+  # ------------------------------------------------------------------
+  release:
+    name: Publish release
+    needs: [linux, windows, macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            dist/linux-packages/*
+            dist/linux-packages/build/*
+            dist/windows-package/*
+            dist/macos-package/*
