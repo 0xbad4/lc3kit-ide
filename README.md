@@ -1,8 +1,12 @@
 # LC3kit IDE
 
+![lc3kit-ide](docs/assets//img/app.png)
+
 A Qt 6-based integrated development environment for LC-3 assembly and emulation, built on top of the `lc3kit` library.
 
 This project provides a desktop IDE for writing LC-3 assembly programs, assembling them, running or debugging them, and inspecting CPU state, registers, memory, symbols, logs, and breakpoints in a single interface.
+
+[Official Website](https://0xbad4.github.io/lc3kit-ide)
 
 ## Overview
 

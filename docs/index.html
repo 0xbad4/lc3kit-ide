@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LC3kit IDE: Build, Debug, Learn</title>
+  <meta name="description"
+    content="LC3kit IDE is a desktop development environment for the LC-3 architecture, with an editor, assembler, virtual machine and debugger.">
+  <meta name="theme-color" content="#141518">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Ubuntu:wght@400;500&family=Ubuntu+Mono&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="#top"><img src="assets/img/lc3kit-ide.png" alt=""><span>LC3kit <b>IDE</b></span></a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="nav">Menu</button>
+      <nav class="nav" id="nav" aria-label="Primary">
+        <a href="#about">About</a>
+        <a href="#features">Features</a>
+        <a href="#tour">Panels</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#" data-repo-link>GitHub</a>
+        <a class="nav-cta" href="#download">Download</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="custom_body">
+    <main id="top">
+      <section class="hero">
+        <div class="wrap hero-inner">
+          <div>
+            <img class="hero-logo" src="assets/img/lc3kit-ide.png" alt="LC3kit logo">
+            <h1>LC3kit <b>IDE</b></h1>
+            <p class="tagline">Build &nbsp;&middot;&nbsp; Debug &nbsp;&middot;&nbsp; Learn</p>
+            <p class="lead">A desktop development environment for the LC-3 architecture. It combines a source editor, an
+              assembler, a virtual machine and a debugger in a single application.</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#download">Download</a>
+              <a class="btn btn-ghost" href="#" data-repo-link>View source</a>
+            </div>
+            <p class="hero-note" id="heroNote"></p>
+          </div>
+          <div class="hero-stack" aria-hidden="true">
+            <figure class="p-memory"><img src="assets/img/memory.png" alt=""></figure>
+            <figure class="p-registers"><img src="assets/img/registers.png" alt=""></figure>
+            <figure class="p-console"><img src="assets/img/console.png" alt=""></figure>
+            <figure class="p-flags"><img src="assets/img/flags.png" alt=""></figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="overview">
+        <div class="wrap">
+          <figure class="shot">
+            <img src="assets/img/app.png"
+              alt="The LC3kit IDE main window showing the editor, breakpoints, registers, flags, memory and symbol table panels"
+              width="1920" height="1046">
+          </figure>
+          <p class="shot-caption">The LC3kit IDE main window: editor, breakpoints, registers and flags,
+            memory
+            and symbol table below.</p>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>About</h2>
+          </div>
+          <div class="about">
+            <div>
+              <div class="about-block">
+                <h3>LC3kit</h3>
+                <p>LC3kit is a library that provides an LC-3 virtual machine and a two-pass assembler producing standard
+                  <code>.obj</code> files. The VM exposes a hook-based debugger interface and supports an optional
+                  instruction set extension, LC3kit-ext. LC3kit IDE is the graphical front end built on this library.
+                </p>
+                <p><a href="#" data-core-link>LC3kit on GitHub</a> &nbsp;&middot;&nbsp; <a href="#"
+                    data-core-docs>Documentation</a></p>
+              </div>
+              <div class="about-block">
+                <h3>Built by a student, for students</h3>
+                <p>LC3kit IDE is developed by a student for students who are learning computer architecture and assembly
+                  programming. The aim is a tool that is simple to install and use, and that shows the state of the
+                  machine at every step of a program.</p>
+                <p>The project is open source and contributions are accepted through GitHub.</p>
+              </div>
+            </div>
+            <div>
+              <h3>The LC-3 in education</h3>
+              <p>The LC-3 (Little Computer 3) is an instruction set architecture designed for teaching. It was
+                introduced
+                with the textbook <i>Introduction to Computing Systems</i> by Yale N. Patt and Sanjay J. Patel and is
+                used
+                in introductory computer organization courses, for example:</p>
+              <ul class="inst-list" id="instList"></ul>
+              <p class="fine-print">LC3kit IDE is an independent project and is not affiliated with these institutions.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Features</h2>
+          </div>
+          <div class="features">
+            <article class="feature">
+              <span class="dot dot-g"></span>
+              <h3>Editor</h3>
+              <p>Tabbed editing of multiple assembly files, with LC-3 syntax highlighting.</p>
+            </article>
+            <article class="feature">
+              <span class="dot dot-b"></span>
+              <h3>Assembler</h3>
+              <p>Assembles LC-3 source into standard object files from within the IDE.</p>
+            </article>
+            <article class="feature">
+              <span class="dot dot-s"></span>
+              <h3>Virtual machine</h3>
+              <p>Runs assembled programs in the LC-3 virtual machine, with a console for input and output.</p>
+            </article>
+            <article class="feature">
+              <span class="dot dot-b"></span>
+              <h3>Debugger</h3>
+              <p>Breakpoints, single stepping and resuming execution, with the machine state visible throughout.</p>
+            </article>
+            <article class="feature">
+              <span class="dot dot-g"></span>
+              <h3>State inspection</h3>
+              <p>Dockable panels for registers, flags, memory, symbols, breakpoints, console and logs.</p>
+            </article>
+            <article class="feature">
+              <span class="dot dot-s"></span>
+              <h3>Examples and themes</h3>
+              <p>Example programs for common LC-3 exercises, and two colour themes, charcoal and daisy.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="tour">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Panels</h2>
+            <p>Each panel can be docked, floated or closed independently.</p>
+          </div>
+          <div class="tour">
+            <div class="tour-tabs" id="tourTabs" role="tablist" aria-label="IDE panels"></div>
+            <div class="tour-stage">
+              <div class="tour-view"><img id="tourImg" src="" alt=""></div>
+              <div class="tour-caption" id="tourCaption" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="workflow">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Workflow</h2>
+          </div>
+          <ol class="workflow">
+            <li><b>Open or create</b>an LC-3 assembly file.</li>
+            <li><b>Assemble</b>the source to object format.</li>
+            <li><b>Run</b>the program in the virtual machine.</li>
+            <li><b>Inspect</b>registers, memory, flags and symbols.</li>
+            <li><b>Step</b>through execution, or resume from a breakpoint.</li>
+            <li><b>Study</b>the bundled example programs.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section" id="download">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Download</h2>
+            <p>Prebuilt packages are published on the GitHub releases page. The project can also be built from source.
+            </p>
+          </div>
+          <div class="download-grid">
+            <div class="card" id="releaseCard">
+              <h3>Latest release</h3>
+              <p class="status" id="releaseStatus">Checking GitHub for the latest release...</p>
+            </div>
+            <div class="card">
+              <div class="build-head">
+                <div>
+                  <h3>Build from source</h3>
+                  <p class="sub">Commands for Debian and Ubuntu</p>
+                </div>
+                <button class="copy-btn" id="copyBuild" type="button">Copy</button>
+              </div>
+              <pre class="code" id="buildCode"></pre>
+              <ul class="req">
+                <li>CMake 3.28 or newer</li>
+                <li>A C++20 compiler</li>
+                <li>Qt 6 and QScintilla for Qt 6</li>
+                <li>Git, used to fetch the lc3kit library at configure time</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span id="footerText"></span>
+        <div class="footer-links">
+          <a href="#" data-repo-link>Source</a>
+          <a href="#" data-releases-link>Releases</a>
+          <a href="#" data-issues-link>Issues</a>
+          <a href="#" data-core-link>LC3kit library</a>
+          <a href="#" data-changelog-link>Changelog</a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>
