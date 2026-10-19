@@ -130,16 +130,16 @@ jobs:
       # compiling QScintilla from source on this runner.
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
+          msystem: UCRT64
           update: true
           install: >-
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-cmake
-            mingw-w64-x86_64-ninja
-            mingw-w64-x86_64-qt6-base
-            mingw-w64-x86_64-qt6-svg
-            mingw-w64-x86_64-qt6-tools
-            mingw-w64-x86_64-qscintilla-qt6
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-qt6-base
+            mingw-w64-ucrt-x86_64-qt6-svg
+            mingw-w64-ucrt-x86_64-qt6-tools
+            mingw-w64-ucrt-x86_64-qscintilla-qt6
             zip
 
       - name: Configure
@@ -179,16 +179,17 @@ jobs:
             seen[$name]=1
             local dep
             while read -r dep; do
-              if [ -f "/mingw64/bin/$dep" ]; then
-                [ -f "dist/$dep" ] || cp "/mingw64/bin/$dep" dist/
-                copy_deps "/mingw64/bin/$dep"
+              if [ -f "/ucrt64/bin/$dep" ]; then
+                [ -f "dist/$dep" ] || cp "/ucrt64/bin/$dep" dist/
+                copy_deps "/ucrt64/bin/$dep"
               fi
             done < <(objdump -p "$bin" | grep -i "DLL Name" | awk '{print $3}')
           }
 
           copy_deps dist/lc3kit-ide.exe
-          cp /mingw64/bin/qscintilla2_qt6.dll dist/
-          copy_deps /mingw64/bin/qscintilla2_qt6.dll
+          QSCI_DLL=$(ls /ucrt64/bin/*qscintilla2_qt6*.dll | head -n1)
+          cp "$QSCI_DLL" dist/
+          copy_deps "$QSCI_DLL"
 
           find dist -name '*.dll' -print0 | while IFS= read -r -d '' f; do
             copy_deps "$f"
